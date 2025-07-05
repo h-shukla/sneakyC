@@ -1,16 +1,16 @@
-const dotenv = require('dotenv');
-const app = require('./app');
-const connectToDB = require('./config/database');
+const dotenv = require("dotenv");
+const app = require("./app");
+const connectToDB = require("./config/database");
 
 // Resolve uncaught errors;
-process.on('uncaughtException', (err) => {
+process.on("uncaughtException", (err) => {
     console.log(`Error: ${err.message}`);
     console.log(`Shutting down the server due to unhandled promise rejection`);
     process.exit(1);
 });
 
 // config file path for dotenv;
-dotenv.config({ path: 'backend/config/config.env' });
+dotenv.config({ path: "./config/config.env" });
 
 // calling database connection after loading config port so that it can get the port number through config file;
 connectToDB();
@@ -21,9 +21,11 @@ const server = app.listen(process.env.PORT, () => {
 });
 
 // Resolve unhandled promise rejection
-process.on('unhandledRejection', err => {
+process.on("unhandledRejection", (err) => {
     console.log(`Error: ${err.message}`);
     console.log(`Shutting down the server due to unhandled promise rejection`);
     // close the server by exiting the process
-    server.close(() => { process.exit(1) });
+    server.close(() => {
+        process.exit(1);
+    });
 });
