@@ -9,13 +9,14 @@ interface NewProductData {
     description: string;
     price: string;
     stock: string;
-    category: string;
+    category: Category;
+    subCategory: Category;
     images: File[];
 }
 
 // Props for the ProductCard component
 interface ProductCardProps {
-    logo: string;
+    images: string[];
     title: string;
     description: string;
     price: number;
@@ -24,10 +25,9 @@ interface ProductCardProps {
     onEdit: () => void;
     onDelete: () => void;
 }
-
-// ProductCard Component
+// ProductCard Component with Image Carousel
 const ProductCard: React.FC<ProductCardProps> = ({
-    logo,
+    images,
     title,
     description,
     price,
@@ -35,14 +35,112 @@ const ProductCard: React.FC<ProductCardProps> = ({
     onEdit,
     onDelete,
 }) => {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    // Handle navigation to previous image
+    const handlePrevImage = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setCurrentImageIndex((prev) =>
+            prev === 0 ? images.length - 1 : prev - 1
+        );
+    };
+
+    // Handle navigation to next image
+    const handleNextImage = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setCurrentImageIndex((prev) =>
+            prev === images.length - 1 ? 0 : prev + 1
+        );
+    };
+
+    // Reset image index when images change
+    useEffect(() => {
+        setCurrentImageIndex(0);
+    }, [images]);
+
     return (
         <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl hover:border-green-400/30">
-            <div className="h-44 bg-white flex items-center justify-center">
-                <img
-                    src={import.meta.env.VITE_API_BASE_URL + "/" + logo}
-                    alt={title}
-                    className="h-24 object-contain"
-                />
+            <div className="h-56 bg-white flex items-center justify-center relative group">
+                {images.length > 0 ? (
+                    <>
+                        <img
+                            src={`${import.meta.env.VITE_API_BASE_URL}/${
+                                images[currentImageIndex]
+                            }`}
+                            alt={`${title} - Image ${currentImageIndex + 1}`}
+                            className="h-40 w-auto object-contain transition-opacity duration-300"
+                        />
+
+                        {/* Navigation arrows - only show if more than 1 image */}
+                        {images.length > 1 && (
+                            <>
+                                {/* Previous button */}
+                                <button
+                                    onClick={handlePrevImage}
+                                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+                                    aria-label="Previous image"
+                                >
+                                    <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <polyline points="15,18 9,12 15,6"></polyline>
+                                    </svg>
+                                </button>
+
+                                {/* Next button */}
+                                <button
+                                    onClick={handleNextImage}
+                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+                                    aria-label="Next image"
+                                >
+                                    <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <polyline points="9,18 15,12 9,6"></polyline>
+                                    </svg>
+                                </button>
+
+                                {/* Image indicators */}
+                                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    {images.map((_, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setCurrentImageIndex(index);
+                                            }}
+                                            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                                index === currentImageIndex
+                                                    ? "bg-white"
+                                                    : "bg-white/50 hover:bg-white/70"
+                                            }`}
+                                            aria-label={`Go to image ${
+                                                index + 1
+                                            }`}
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </>
+                ) : (
+                    // Placeholder for no images
+                    <div className="text-gray-400 text-6xl">📷</div>
+                )}
             </div>
             <div className="p-6">
                 <h4 className="text-white text-lg font-semibold mb-2">
@@ -82,6 +180,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 const Products: React.FC = () => {
     const [products, setProducts] = useState<ProductInterface[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [subCategories, setSubCategories] = useState<Category[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
@@ -97,7 +196,8 @@ const Products: React.FC = () => {
         description: "",
         price: "",
         stock: "",
-        category: "",
+        category: { _id: "", name: "", description: "" },
+        subCategory: { _id: "", name: "", description: "" },
         images: [],
     });
 
@@ -110,6 +210,7 @@ const Products: React.FC = () => {
                 `${import.meta.env.VITE_API_BASE_URL}/products`
             );
             setProducts(res.data.products);
+            // console.log(res.data.products);
         } catch (err) {
             setError(`Failed to fetch products. ${getErrorMessage(err)}`);
         } finally {
@@ -117,14 +218,23 @@ const Products: React.FC = () => {
         }
     };
 
-    // Fetch categories from API
+    // Fetch categories & seperate subcategories from it
     const getCategories = async () => {
         setError(""); // Clear error specific to category fetch
         try {
             const res = await axios.get(
                 `${import.meta.env.VITE_API_BASE_URL}/category`
             );
-            setCategories(res.data.categories);
+            const categories: Category[] = res.data.categories;
+            const subCategories = categories.filter(
+                (cat: Category) => cat.name !== "Men" && cat.name !== "Women"
+            );
+            setSubCategories(subCategories);
+
+            const cat = categories.filter(
+                (cat: Category) => cat.name === "Men" || cat.name === "Women"
+            );
+            setCategories(cat);
         } catch (err) {
             setError(`Failed to fetch categories. ${getErrorMessage(err)}`);
         }
@@ -155,7 +265,8 @@ const Products: React.FC = () => {
             description: "",
             price: "",
             stock: "",
-            category: "",
+            category: { _id: "", name: "", description: "" },
+            subCategory: { _id: "", name: "", description: "" },
             images: [],
         });
         setError("");
@@ -164,6 +275,7 @@ const Products: React.FC = () => {
     };
 
     // Validate the form before submission
+    // Updated form validation to check for category._id instead of just category
     const validateForm = (): boolean => {
         const { name, description, price, stock, category, images } =
             newProduct;
@@ -172,15 +284,15 @@ const Products: React.FC = () => {
             !description ||
             !price ||
             !stock ||
-            !category ||
-            (!images.length && !isEditMode) // Images are optional in edit mode if no new ones are added
+            !category._id || // Check for category ID specifically
+            (!images.length && !isEditMode)
         ) {
             setError(
                 "Please fill in all required fields. Ensure a category is selected and images are provided for new products."
             );
             return false;
         }
-        // Additional validation for numbers if necessary
+
         if (isNaN(Number(price)) || Number(price) < 0) {
             setError("Price must be a non-negative number.");
             return false;
@@ -195,15 +307,30 @@ const Products: React.FC = () => {
     // Create FormData for API requests
     const createFormData = (productData: NewProductData): FormData => {
         const formData = new FormData();
-        Object.entries(productData).forEach(([key, value]) => {
+
+        // Transform the product data to match backend expectations
+        const transformedData = {
+            ...productData,
+            // Send only the ID for category and subCategory
+            category: productData.category._id,
+            subCategory: productData.subCategory._id,
+        };
+
+        Object.entries(transformedData).forEach(([key, value]) => {
             if (key === "images") {
                 (value as File[]).forEach((img) =>
                     formData.append("images", img)
                 );
-            } else {
+            } else if (key !== "category" && key !== "subCategory") {
+                // Skip the original category/subCategory objects
                 formData.append(key, value as string);
             }
         });
+
+        // Explicitly append the category and subCategory IDs
+        formData.append("category", transformedData.category);
+        formData.append("subCategory", transformedData.subCategory);
+
         return formData;
     };
 
@@ -321,8 +448,9 @@ const Products: React.FC = () => {
         if (!q) return true;
         return (
             p.name.toLowerCase().includes(q) ||
-            p.description.toLowerCase().includes(q) ||
-            p.category?.toLowerCase().includes(q) // Assuming category is a string ID
+            // p.description.toLowerCase().includes(q) ||
+            p.category.name.toLowerCase().includes(q) ||
+            p.subCategory.name.toLowerCase().includes(q)
         );
     });
 
@@ -436,7 +564,7 @@ const Products: React.FC = () => {
                     {filteredProducts.map((product) => (
                         <ProductCard
                             key={product._id!}
-                            logo={product.image?.[0] || ""}
+                            images={product.imagePublicId || []}
                             title={product.name}
                             description={product.description}
                             price={Number(product.price)}
@@ -449,7 +577,17 @@ const Products: React.FC = () => {
                                     description: product.description,
                                     price: String(product.price),
                                     stock: String(product.stock),
-                                    category: product.category || "", // Ensure category is set correctly
+
+                                    category: product.category || {
+                                        _id: "",
+                                        name: "",
+                                        description: "",
+                                    },
+                                    subCategory: product.subCategory || {
+                                        _id: "",
+                                        name: "",
+                                        description: "",
+                                    },
                                     images: [], // Clear existing images for re-upload
                                 });
                                 setIsEditMode(true); // Set to edit mode
@@ -554,7 +692,7 @@ const Products: React.FC = () => {
                                     <div className="relative">
                                         <select
                                             name="category"
-                                            value={newProduct.category}
+                                            value={newProduct.category._id}
                                             onChange={handleInputChange}
                                             className="w-full px-4 py-3 border border-white/20 rounded-xl bg-[#0e0913] backdrop-blur-md text-white focus:outline-none focus:ring-2 focus:ring-red-400/50 appearance-none"
                                             style={{
@@ -596,11 +734,63 @@ const Products: React.FC = () => {
                                     </div>
                                 </div>
 
+                                {/* Sub Category */}
+                                <div>
+                                    <label className="block text-white/80 text-sm font-medium mb-2">
+                                        Sub Category *
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            name="subCategory"
+                                            value={newProduct.subCategory._id}
+                                            onChange={handleInputChange}
+                                            className="w-full px-4 py-3 border border-white/20 rounded-xl bg-[#0e0913] backdrop-blur-md text-white focus:outline-none focus:ring-2 focus:ring-red-400/50 appearance-none"
+                                            style={{
+                                                colorScheme: "dark",
+                                            }}
+                                            required
+                                        >
+                                            <option
+                                                value=""
+                                                className="bg-[#0e0913] text-white"
+                                            >
+                                                Select sub category
+                                            </option>
+                                            {subCategories.map((cat) => (
+                                                <option
+                                                    key={cat._id}
+                                                    value={cat._id}
+                                                    className="bg-[#0e0913] text-white hover:bg-gray-800"
+                                                >
+                                                    {cat.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {/* Custom arrow for select */}
+                                        <svg
+                                            className="w-4 h-4 absolute right-3 top-1/2 -mt-2 text-white/60 pointer-events-none"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M8 9l4-4 4 4m0 6l-4 4-4-4"
+                                            ></path>
+                                        </svg>
+                                    </div>
+                                </div>
+
                                 {/* File Upload */}
                                 <div>
                                     <label className="block text-white/80 text-sm font-medium mb-2">
                                         Product Images{" "}
                                         {isEditMode ? "(optional)" : "*"}
+                                        (Selection of multiple images is
+                                        supported)
                                     </label>
                                     <input
                                         type="file"

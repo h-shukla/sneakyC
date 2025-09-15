@@ -30,7 +30,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
     ];
 
     return (
-        <aside className="w-72 bg-white/10 backdrop-blur-xl border-r border-white/20 py-8 shadow-xl">
+        <aside className="fixed top-0 left-0 h-screen w-72 bg-white/10 backdrop-blur-xl border-r border-white/20 py-8 shadow-xl overflow-y-auto z-10">
             {/* Logo Section */}
             <div className="px-8 pb-8 border-b border-white/10 mb-8">
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-red-400 to-yellow-400 bg-clip-text text-transparent mb-2">

@@ -54,7 +54,16 @@ exports.getAllProducts = catchAsyncErrors(async (req, res, next) => {
         .search()
         .filter()
         .pagination(resultsPerPage);
-    const products = await apiFeatures.query;
+
+    const products = await apiFeatures.query
+        .populate({
+            path: "category",
+            select: "name",
+        })
+        .populate({
+            path: "subCategory",
+            select: "name",
+        });
     if (!products) {
         return next(new ErrorHandler());
     }

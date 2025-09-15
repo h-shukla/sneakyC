@@ -20,11 +20,16 @@ const productSchema = new mongoose.Schema({
         ref: "Category",
         required: [true, "Please enter product category"],
     },
+    subCategory: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Category",
+        required: [false],
+    },
     ratings: {
         type: Number,
         default: 0,
     },
-    image: [
+    images: [
         {
             type: String,
             required: true,

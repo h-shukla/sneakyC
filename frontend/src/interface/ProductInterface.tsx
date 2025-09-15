@@ -1,12 +1,15 @@
+import type { Category } from "./CategoryInterface";
+
 export interface ProductInterface {
     _id: string;
     name: string;
     description: string;
     price: number;
-    category: string;
+    category: Category;
+    subCategory: Category;
     ratings: number;
     reviews: number;
-    image: string[];
+    images: string[];
     imagePublicId: string[];
     stock: number;
     numberOfReviews: number;

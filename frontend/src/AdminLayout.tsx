@@ -15,13 +15,11 @@ const AdminLayout = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-600 overflow-x-hidden">
-            <div className="flex min-h-screen">
-                <Sidebar />
-                {/* Main content area */}
-                <main className="flex-1 p-8 bg-white/5">
-                    <Outlet />
-                </main>
-            </div>
+            <Sidebar />
+            {/* Main content area */}
+            <main className="ml-72 flex-1 p-8 bg-white/5">
+                <Outlet />
+            </main>
         </div>
     );
 };
