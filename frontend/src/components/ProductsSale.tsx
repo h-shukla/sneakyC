@@ -47,7 +47,11 @@ const ProductsSale = ({
             {/* Product Image */}
             <div className="mb-4 flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-white">
                 <img
-                    src={product.image[0]} // Assuming the first image is the primary one
+                    src={
+                        import.meta.env.VITE_API_BASE_URL +
+                        "/" +
+                        product.imagePublicId[0]
+                    } // Assuming the first image is the primary one
                     alt={product.name}
                     className="h-32 w-32 object-cover"
                 />

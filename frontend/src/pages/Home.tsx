@@ -34,7 +34,7 @@ const Home = () => {
                 );
                 const { bestSellingProducts, flashSaleProducts, categories } =
                     response.data;
-
+                console.log(response.data);
                 setBestSellingProducts(bestSellingProducts);
                 setFlashSaleProducts(flashSaleProducts);
                 setCategories(categories);
