@@ -1,3 +1,4 @@
 /node_modules
 /v.txt
 /uploads
+/config/config.env
