@@ -18,12 +18,11 @@ const productSchema = new mongoose.Schema({
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Category",
-        required: [true, "Please enter product category"],
     },
     subCategory: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Category",
-        required: [false],
+        required: [true, "Please enter product category"],
     },
     ratings: {
         type: Number,

@@ -25,6 +25,7 @@ interface ProductCardProps {
     onEdit: () => void;
     onDelete: () => void;
 }
+
 // ProductCard Component with Image Carousel
 const ProductCard: React.FC<ProductCardProps> = ({
     images,
@@ -37,7 +38,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    // Handle navigation to previous image
     const handlePrevImage = (e: React.MouseEvent) => {
         e.stopPropagation();
         setCurrentImageIndex((prev) =>
@@ -45,7 +45,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
         );
     };
 
-    // Handle navigation to next image
     const handleNextImage = (e: React.MouseEvent) => {
         e.stopPropagation();
         setCurrentImageIndex((prev) =>
@@ -53,7 +52,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
         );
     };
 
-    // Reset image index when images change
     useEffect(() => {
         setCurrentImageIndex(0);
     }, [images]);
@@ -70,51 +68,22 @@ const ProductCard: React.FC<ProductCardProps> = ({
                             alt={`${title} - Image ${currentImageIndex + 1}`}
                             className="h-40 w-auto object-contain transition-opacity duration-300"
                         />
-
-                        {/* Navigation arrows - only show if more than 1 image */}
                         {images.length > 1 && (
                             <>
-                                {/* Previous button */}
                                 <button
                                     onClick={handlePrevImage}
                                     className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
                                     aria-label="Previous image"
                                 >
-                                    <svg
-                                        width="16"
-                                        height="16"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <polyline points="15,18 9,12 15,6"></polyline>
-                                    </svg>
+                                    ◀
                                 </button>
-
-                                {/* Next button */}
                                 <button
                                     onClick={handleNextImage}
                                     className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
                                     aria-label="Next image"
                                 >
-                                    <svg
-                                        width="16"
-                                        height="16"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <polyline points="9,18 15,12 9,6"></polyline>
-                                    </svg>
+                                    ▶
                                 </button>
-
-                                {/* Image indicators */}
                                 <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                     {images.map((_, index) => (
                                         <button
@@ -128,9 +97,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
                                                     ? "bg-white"
                                                     : "bg-white/50 hover:bg-white/70"
                                             }`}
-                                            aria-label={`Go to image ${
-                                                index + 1
-                                            }`}
                                         />
                                     ))}
                                 </div>
@@ -138,7 +104,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
                         )}
                     </>
                 ) : (
-                    // Placeholder for no images
                     <div className="text-gray-400 text-6xl">📷</div>
                 )}
             </div>
@@ -160,13 +125,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 <div className="flex gap-2">
                     <button
                         onClick={onEdit}
-                        className="flex-1 px-3 py-2 bg-white/10 text-white text-sm rounded-lg border border-white/20 hover:bg-white/15 transition-all flex items-center justify-center gap-1"
+                        className="flex-1 px-3 py-2 bg-white/10 text-white text-sm rounded-lg border border-white/20 hover:bg-white/15 transition-all"
                     >
                         ✏️ Edit
                     </button>
                     <button
                         onClick={onDelete}
-                        className="flex-1 px-3 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm rounded-lg hover:-translate-y-1 transition-all flex items-center justify-center gap-1"
+                        className="flex-1 px-3 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm rounded-lg hover:-translate-y-1 transition-all"
                     >
                         🗑️ Delete
                     </button>
@@ -178,19 +143,18 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
 // Products Page Component
 const Products: React.FC = () => {
+    const [error, setError] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>("");
     const [products, setProducts] = useState<ProductInterface[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [subCategories, setSubCategories] = useState<Category[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
 
-    // State for managing the modal
     const [showModal, setShowModal] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [editProductId, setEditProductId] = useState<string | null>(null);
 
-    // State for the product form data
     const [newProduct, setNewProduct] = useState<NewProductData>({
         name: "",
         description: "",
@@ -201,56 +165,69 @@ const Products: React.FC = () => {
         images: [],
     });
 
-    // Fetch products from API
     const getProducts = async () => {
         setIsLoading(true);
-        setError("");
         try {
             const res = await axios.get(
                 `${import.meta.env.VITE_API_BASE_URL}/products`
             );
             setProducts(res.data.products);
-            // console.log(res.data.products);
-        } catch (err) {
-            setError(`Failed to fetch products. ${getErrorMessage(err)}`);
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Fetch categories & seperate subcategories from it
     const getCategories = async () => {
-        setError(""); // Clear error specific to category fetch
-        try {
-            const res = await axios.get(
-                `${import.meta.env.VITE_API_BASE_URL}/category`
-            );
-            const categories: Category[] = res.data.categories;
-            const subCategories = categories.filter(
-                (cat: Category) => cat.name !== "Men" && cat.name !== "Women"
-            );
-            setSubCategories(subCategories);
+        const res = await axios.get(
+            `${import.meta.env.VITE_API_BASE_URL}/category`
+        );
+        const categories: Category[] = res.data.categories;
+        const subCategories = categories.filter(
+            (cat: Category) => cat.name !== "Men" && cat.name !== "Women"
+        );
+        setSubCategories(subCategories);
 
-            const cat = categories.filter(
-                (cat: Category) => cat.name === "Men" || cat.name === "Women"
-            );
-            setCategories(cat);
-        } catch (err) {
-            setError(`Failed to fetch categories. ${getErrorMessage(err)}`);
-        }
+        const cat = categories.filter(
+            (cat: Category) => cat.name === "Men" || cat.name === "Women"
+        );
+        setCategories(cat);
     };
 
-    // Handle input changes for form fields
     const handleInputChange = (
         e: React.ChangeEvent<
             HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
         >
     ) => {
         const { name, value } = e.target;
-        setNewProduct((prev) => ({ ...prev, [name]: value }));
+        if (name === "category") {
+            const selectedCategory = categories.find(
+                (cat) => cat._id === value
+            );
+            setNewProduct((prev) => ({
+                ...prev,
+                category: selectedCategory || {
+                    _id: "",
+                    name: "",
+                    description: "",
+                },
+            }));
+        } else if (name === "subCategory") {
+            const selectedSubCategory = subCategories.find(
+                (cat) => cat._id === value
+            );
+            setNewProduct((prev) => ({
+                ...prev,
+                subCategory: selectedSubCategory || {
+                    _id: "",
+                    name: "",
+                    description: "",
+                },
+            }));
+        } else {
+            setNewProduct((prev) => ({ ...prev, [name]: value }));
+        }
     };
 
-    // Handle file input changes for images
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (files) {
@@ -258,7 +235,6 @@ const Products: React.FC = () => {
         }
     };
 
-    // Reset the form state
     const resetForm = () => {
         setNewProduct({
             name: "",
@@ -269,178 +245,121 @@ const Products: React.FC = () => {
             subCategory: { _id: "", name: "", description: "" },
             images: [],
         });
-        setError("");
         setEditProductId(null);
         setIsEditMode(false);
     };
 
-    // Validate the form before submission
-    // Updated form validation to check for category._id instead of just category
-    const validateForm = (): boolean => {
-        const { name, description, price, stock, category, images } =
-            newProduct;
-        if (
-            !name ||
-            !description ||
-            !price ||
-            !stock ||
-            !category._id || // Check for category ID specifically
-            (!images.length && !isEditMode)
-        ) {
-            setError(
-                "Please fill in all required fields. Ensure a category is selected and images are provided for new products."
-            );
-            return false;
-        }
-
-        if (isNaN(Number(price)) || Number(price) < 0) {
-            setError("Price must be a non-negative number.");
-            return false;
-        }
-        if (isNaN(Number(stock)) || Number(stock) < 0) {
-            setError("Stock must be a non-negative integer.");
-            return false;
-        }
-        return true;
-    };
-
-    // Create FormData for API requests
     const createFormData = (productData: NewProductData): FormData => {
         const formData = new FormData();
-
-        // Transform the product data to match backend expectations
         const transformedData = {
-            ...productData,
-            // Send only the ID for category and subCategory
+            name: productData.name,
+            description: productData.description,
+            price: productData.price,
+            stock: productData.stock,
             category: productData.category._id,
             subCategory: productData.subCategory._id,
         };
-
         Object.entries(transformedData).forEach(([key, value]) => {
-            if (key === "images") {
-                (value as File[]).forEach((img) =>
-                    formData.append("images", img)
-                );
-            } else if (key !== "category" && key !== "subCategory") {
-                // Skip the original category/subCategory objects
-                formData.append(key, value as string);
-            }
+            if (value) formData.append(key, value as string);
         });
-
-        // Explicitly append the category and subCategory IDs
-        formData.append("category", transformedData.category);
-        formData.append("subCategory", transformedData.subCategory);
-
+        productData.images.forEach((img) => {
+            formData.append("images", img);
+        });
         return formData;
     };
 
-    // Helper to extract meaningful error messages from Axios errors
-    const getErrorMessage = (err: unknown): string => {
-        if (axios.isAxiosError(err)) {
-            // Try to get specific message from response data
-            const message =
-                err.response?.data?.message || err.response?.data?.error;
-            if (typeof message === "string") {
-                return message;
-            }
-            // Fallback to generic error message
-            return err.message || "An API error occurred.";
-        }
-        if (err instanceof Error) {
-            return err.message;
-        }
-        return "An unexpected error occurred.";
-    };
-
-    // Handle adding a new product
     const handleAddProduct = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!validateForm()) return;
-
         setIsLoading(true);
-        setError("");
-
         try {
+            const formData = createFormData(newProduct);
             await axios.post(
                 `${import.meta.env.VITE_API_BASE_URL}/admin/products/new`,
-                createFormData(newProduct),
+                formData,
                 {
                     headers: { "Content-Type": "multipart/form-data" },
                     withCredentials: true,
                 }
             );
-            await getProducts(); // Refresh the product list
-            setShowModal(false); // Close the modal
-            resetForm(); // Reset form fields
+            await getProducts();
+            setShowModal(false);
+            resetForm();
         } catch (err) {
-            setError(getErrorMessage(err));
+            setError(true);
+            setErrorMessage(
+                `Failed to add product. ${
+                    err instanceof Error ? err.message : "Unknown error"
+                }`
+            );
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Handle updating an existing product
     const handleUpdateProduct = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!validateForm() || !editProductId) return; // Ensure we have an ID to update
-
+        if (!editProductId) return;
         setIsLoading(true);
-        setError("");
-
         try {
+            const formData = createFormData(newProduct);
             await axios.put(
                 `${
                     import.meta.env.VITE_API_BASE_URL
                 }/admin/products/${editProductId}`,
-                createFormData(newProduct),
+                formData,
                 {
                     headers: { "Content-Type": "multipart/form-data" },
                     withCredentials: true,
                 }
             );
-            await getProducts(); // Refresh the product list
-            setShowModal(false); // Close the modal
-            resetForm(); // Reset form fields
+            await getProducts();
+            setShowModal(false);
+            resetForm();
         } catch (err) {
-            setError(getErrorMessage(err));
+            setError(true);
+            setErrorMessage(
+                `Failed to update product. ${
+                    err instanceof Error ? err.message : "Unknown error"
+                }`
+            );
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Handle deleting a product
     const handleDeleteProduct = async (productId: string) => {
-        if (!window.confirm("Are you sure you want to delete this product?")) {
+        if (!window.confirm("Are you sure you want to delete this product?"))
             return;
-        }
-
         setIsLoading(true);
-        setError("");
         try {
             await axios.delete(
                 `${
                     import.meta.env.VITE_API_BASE_URL
                 }/admin/products/${productId}`,
-                { withCredentials: true }
+                {
+                    withCredentials: true,
+                }
             );
-            await getProducts(); // Refresh the product list
-            // If the deleted product was the one in edit mode, close modal
+            await getProducts();
             if (editProductId === productId) {
                 setShowModal(false);
                 resetForm();
             }
         } catch (err) {
-            setError(getErrorMessage(err));
+            setError(true);
+            setErrorMessage(
+                `Failed to delete product. ${
+                    err instanceof Error ? err.message : "Unknown error"
+                }`
+            );
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Effect to fetch initial data when the component mounts
     useEffect(() => {
         getProducts();
         getCategories();
-        // eslint-disable-next-line
     }, []);
 
     const filteredProducts = products.filter((p) => {
@@ -448,7 +367,6 @@ const Products: React.FC = () => {
         if (!q) return true;
         return (
             p.name.toLowerCase().includes(q) ||
-            // p.description.toLowerCase().includes(q) ||
             p.category.name.toLowerCase().includes(q) ||
             p.subCategory.name.toLowerCase().includes(q)
         );
@@ -459,7 +377,8 @@ const Products: React.FC = () => {
     return (
         <div className="min-h-screen overflow-x-hidden">
             <main className="p-8 bg-white/5">
-                <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 mb-8 border border-white/20 shadow-lg">
+                {/* Header */}
+                <div className="bg-white/10 rounded-3xl p-6 mb-8 border border-white/20 shadow-lg">
                     <div className="flex justify-between items-center flex-wrap gap-4">
                         <div>
                             <h2 className="text-white text-3xl font-semibold mb-2">
@@ -471,15 +390,15 @@ const Products: React.FC = () => {
                             </p>
                         </div>
                         <div className="flex gap-4">
-                            <button className="px-6 py-3 bg-white/10 text-white border border-white/20 backdrop-blur-md rounded-xl font-semibold hover:bg-white/15 transition-all duration-300 hover:-translate-y-1 flex items-center gap-2">
+                            <button className="px-6 py-3 bg-white/10 text-white border border-white/20 rounded-xl">
                                 📊 Export
                             </button>
                             <button
                                 onClick={() => {
-                                    resetForm(); // Reset form for new product
-                                    setShowModal(true); // Open modal
+                                    resetForm();
+                                    setShowModal(true);
                                 }}
-                                className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-green-400/40 flex items-center gap-2"
+                                className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl"
                             >
                                 ➕ Add Product
                             </button>
@@ -487,8 +406,9 @@ const Products: React.FC = () => {
                     </div>
                 </div>
 
+                {/* Stats */}
                 <div className="flex gap-6 mb-8">
-                    <div className="flex-1 bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-lg">
+                    <div className="flex-1 bg-white/10 rounded-3xl p-6 border border-white/20 shadow-lg">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-white/70 text-sm font-medium uppercase tracking-wide">
@@ -504,7 +424,7 @@ const Products: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="flex-1 bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-lg">
+                    <div className="flex-1 bg-white/10 rounded-3xl p-6 border border-white/20 shadow-lg">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-white/70 text-sm font-medium uppercase tracking-wide">
@@ -521,7 +441,8 @@ const Products: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 mb-8 border border-white/20 shadow-lg">
+                {/* Search */}
+                <div className="bg-white/10 rounded-3xl p-6 mb-8 border border-white/20 shadow-lg">
                     <div className="flex gap-4 items-center flex-wrap">
                         <div className="flex-1 min-w-64 relative">
                             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 text-xl">
@@ -531,35 +452,29 @@ const Products: React.FC = () => {
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-12 pr-4 py-3 border border-white/20 rounded-xl bg-white/10 backdrop-blur-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-green-400/50"
-                                placeholder="Search products by name, description, or category..."
+                                className="w-full pl-12 pr-4 py-3 border border-white/20 rounded-xl bg-white/10 text-white"
+                                placeholder="Search products..."
                             />
                         </div>
                     </div>
                 </div>
 
-                {/* Error Display */}
-                {error && (
-                    <div className="bg-red-500/20 border border-red-500/40 text-red-300 px-4 py-3 rounded-xl mb-6">
-                        {error}
-                    </div>
-                )}
-
-                {/* Loading Spinner or Message */}
+                {/* Loading */}
                 {isLoading && (
                     <div className="text-center py-10">Loading...</div>
                 )}
 
-                {/* Products Grid */}
-                {!isLoading && filteredProducts.length === 0 && !error && (
+                {/* No Products */}
+                {!isLoading && filteredProducts.length === 0 && (
                     <div className="text-center py-10">
                         <div className="text-6xl mb-4">📭</div>
                         <p className="text-white/70 text-lg">
-                            No products found matching your criteria.
+                            No products found.
                         </p>
                     </div>
                 )}
 
+                {/* Products Grid */}
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                     {filteredProducts.map((product) => (
                         <ProductCard
@@ -571,13 +486,11 @@ const Products: React.FC = () => {
                             stock={Number(product.stock)}
                             _id={product._id!}
                             onEdit={() => {
-                                // Populate form with product data for editing
                                 setNewProduct({
                                     name: product.name,
                                     description: product.description,
                                     price: String(product.price),
                                     stock: String(product.stock),
-
                                     category: product.category || {
                                         _id: "",
                                         name: "",
@@ -588,20 +501,18 @@ const Products: React.FC = () => {
                                         name: "",
                                         description: "",
                                     },
-                                    images: [], // Clear existing images for re-upload
+                                    images: [],
                                 });
-                                setIsEditMode(true); // Set to edit mode
-                                setEditProductId(product._id!); // Set the ID of product being edited
-                                setShowModal(true); // Open the modal
+                                setIsEditMode(true);
+                                setEditProductId(product._id!);
+                                setShowModal(true);
                             }}
-                            onDelete={() => {
-                                handleDeleteProduct(product._id!);
-                            }}
+                            onDelete={() => handleDeleteProduct(product._id!)}
                         />
                     ))}
                 </div>
 
-                {/* Product Modal (Add/Edit) */}
+                {/* Product Modal */}
                 {showModal && (
                     <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex justify-center items-center z-50 p-4">
                         <div className="bg-black/60 backdrop-blur-2xl border border-white/20 rounded-3xl p-8 w-full max-w-xl mx-auto shadow-2xl max-h-[90vh] overflow-y-auto">
@@ -633,7 +544,6 @@ const Products: React.FC = () => {
                                         required
                                     />
                                 </div>
-
                                 {/* Description */}
                                 <div>
                                     <label className="block text-white/80 text-sm font-medium mb-2">
@@ -648,7 +558,6 @@ const Products: React.FC = () => {
                                         required
                                     />
                                 </div>
-
                                 {/* Price */}
                                 <div>
                                     <label className="block text-white/80 text-sm font-medium mb-2">
@@ -666,7 +575,6 @@ const Products: React.FC = () => {
                                         required
                                     />
                                 </div>
-
                                 {/* Stock */}
                                 <div>
                                     <label className="block text-white/80 text-sm font-medium mb-2">
@@ -683,7 +591,6 @@ const Products: React.FC = () => {
                                         required
                                     />
                                 </div>
-
                                 {/* Category */}
                                 <div>
                                     <label className="block text-white/80 text-sm font-medium mb-2">
@@ -698,7 +605,6 @@ const Products: React.FC = () => {
                                             style={{
                                                 colorScheme: "dark",
                                             }}
-                                            required
                                         >
                                             <option
                                                 value=""
@@ -733,7 +639,6 @@ const Products: React.FC = () => {
                                         </svg>
                                     </div>
                                 </div>
-
                                 {/* Sub Category */}
                                 <div>
                                     <label className="block text-white/80 text-sm font-medium mb-2">
@@ -783,7 +688,6 @@ const Products: React.FC = () => {
                                         </svg>
                                     </div>
                                 </div>
-
                                 {/* File Upload */}
                                 <div>
                                     <label className="block text-white/80 text-sm font-medium mb-2">
@@ -801,7 +705,13 @@ const Products: React.FC = () => {
                                         required={!isEditMode} // Only required if not in edit mode
                                     />
                                 </div>
-
+                                {error ? (
+                                    <div className="bg-red-500/20 border border-red-500/40 text-red-300 px-4 py-3 rounded-xl mb-4">
+                                        {errorMessage}
+                                    </div>
+                                ) : (
+                                    ""
+                                )}
                                 {/* Action Buttons */}
                                 <div className="flex gap-4 justify-end mt-8">
                                     <button
@@ -809,6 +719,8 @@ const Products: React.FC = () => {
                                         onClick={() => {
                                             setShowModal(false); // Close modal
                                             resetForm(); // Reset form on cancel
+                                            setError(false);
+                                            setErrorMessage("");
                                         }}
                                         disabled={isLoading}
                                         className="px-6 py-3 bg-white/10 text-white border border-white/20 rounded-xl hover:bg-white/15 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-white/50"
