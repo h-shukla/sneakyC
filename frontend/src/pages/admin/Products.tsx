@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import type { ProductInterface } from "../../interface/ProductInterface";
 import type { Category } from "../../interface/CategoryInterface";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Interface for the data used in the form/modal
 interface NewProductData {
@@ -75,14 +76,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
                                     className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
                                     aria-label="Previous image"
                                 >
-                                    ◀
+                                    <ChevronLeft size={20} />
                                 </button>
                                 <button
                                     onClick={handleNextImage}
                                     className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
                                     aria-label="Next image"
                                 >
-                                    ▶
+                                    <ChevronRight size={20} />
                                 </button>
                                 <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                     {images.map((_, index) => (

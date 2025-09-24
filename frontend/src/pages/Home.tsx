@@ -34,7 +34,7 @@ const Home = () => {
                 );
                 const { bestSellingProducts, flashSaleProducts, categories } =
                     response.data;
-                console.log(response.data);
+                // console.log(response.data);
                 setBestSellingProducts(bestSellingProducts);
                 setFlashSaleProducts(flashSaleProducts);
                 setCategories(categories);
@@ -57,12 +57,12 @@ const Home = () => {
             <ProductsSale
                 withTimer={true}
                 timerDuration={flashSaleEndTime}
-                products={flashSaleProducts} // Use flashSaleProducts here
+                products={flashSaleProducts}
             />
             <HomeCategories categories={categories} />
             <ProductsSale
                 withTimer={false}
-                products={bestSellingProducts} // Use bestSellingProducts here
+                products={bestSellingProducts}
             />
             <FormalShoesBanner />
             <FeaturesSection />
