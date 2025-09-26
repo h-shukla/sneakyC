@@ -10,7 +10,7 @@ import {
     ArrowLeft,
 } from "lucide-react";
 import type { ProductInterface as Product } from "../interface/ProductInterface";
-import { useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { addToCart } from "../utils/CartHandler";
 
 const ProductDetails: React.FC = () => {
@@ -22,6 +22,7 @@ const ProductDetails: React.FC = () => {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -34,8 +35,7 @@ const ProductDetails: React.FC = () => {
                 );
                 setProduct(response.data.product);
                 setError(null);
-            } catch (error) {
-                console.error("Error fetching product:", error);
+            } catch {
                 setError("Failed to load product details");
             } finally {
                 setLoading(false);
@@ -47,25 +47,26 @@ const ProductDetails: React.FC = () => {
 
     useEffect(() => {
         const fetchSuggestedProducts = async () => {
-            if (!product?.category) return;
-
             try {
-                const response = await axios.get(
+                const productsRes = await axios.get(
                     `${import.meta.env.VITE_API_BASE_URL}/products`
                 );
 
-                // Filter products by same category and exclude current product
-                const filtered = response.data.products
-                    .filter(
-                        (p: Product) =>
-                            p.category === product.category &&
-                            p._id !== product._id
-                    )
-                    .slice(0, 4); // Limit to 4 suggested products
+                const allProducts: Product[] = productsRes.data.products;
 
-                setSuggestedProducts(filtered);
-            } catch (error) {
-                console.error("Error fetching suggested products:", error);
+                if (!product?.category?._id) return;
+
+                const filtered = allProducts.filter((p) => {
+                    return (
+                        p.subCategory?._id === product.subCategory!._id &&
+                        p.category?._id === product.category!._id &&
+                        p._id !== product._id
+                    );
+                });
+
+                setSuggestedProducts(filtered.slice(0, 4));
+            } catch (err) {
+                console.error("Failed to load suggested products", err);
             }
         };
 
@@ -171,7 +172,7 @@ const ProductDetails: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 py-6 md:py-12">
                 {/* Back Button */}
                 <button
-                    onClick={() => window.history.back()}
+                    onClick={() => navigate("/products")}
                     className="flex items-center space-x-2 text-gray-600 hover:text-black mb-6 transition"
                 >
                     <ArrowLeft className="w-5 h-5" />
@@ -190,17 +191,22 @@ const ProductDetails: React.FC = () => {
                             )}
                             <img
                                 src={
-                                    product.image[selectedImageIndex] ||
-                                    "https://via.placeholder.com/400"
+                                    product.imagePublicId[selectedImageIndex]
+                                        ? `${
+                                              import.meta.env.VITE_API_BASE_URL
+                                          }/${product.imagePublicId[
+                                              selectedImageIndex
+                                          ].replace(/\\/g, "/")}`
+                                        : "https://via.placeholder.com/150"
                                 }
                                 alt={product.name}
-                                className="max-h-full max-w-full object-contain"
+                                className="w-full h-full object-contain"
                             />
                         </div>
 
-                        {product.image.length > 1 && (
+                        {product.imagePublicId.length > 1 && (
                             <div className="flex space-x-2 overflow-x-auto">
-                                {product.image.map((img, index) => (
+                                {product.imagePublicId.map((img, index) => (
                                     <button
                                         key={index}
                                         onClick={() =>
@@ -214,11 +220,18 @@ const ProductDetails: React.FC = () => {
                                     >
                                         <img
                                             src={
-                                                img ||
-                                                "https://via.placeholder.com/80"
+                                                img
+                                                    ? `${
+                                                          import.meta.env
+                                                              .VITE_API_BASE_URL
+                                                      }/${img.replace(
+                                                          /\\/g,
+                                                          "/"
+                                                      )}`
+                                                    : "https://via.placeholder.com/150"
                                             }
-                                            alt={`${product.name} ${index + 1}`}
-                                            className="w-full h-full object-contain"
+                                            alt={product.name}
+                                            className="h-24 md:h-32 object-contain"
                                         />
                                     </button>
                                 ))}
@@ -356,54 +369,72 @@ const ProductDetails: React.FC = () => {
                                         : null;
 
                                 return (
-                                    <div
+                                    <Link
                                         key={suggestedProduct._id}
-                                        className="bg-gray-50 p-2 md:p-4 rounded shadow-sm hover:shadow-md transition cursor-pointer"
+                                        to={`/product/${suggestedProduct._id}`}
                                     >
-                                        <div className="relative h-32 md:h-48 flex items-center justify-center bg-white mb-2 md:mb-4 overflow-hidden rounded">
-                                            {suggestedProduct.discount && (
-                                                <span className="absolute top-1 md:top-2 left-1 md:left-2 bg-red-500 text-white text-xs px-1 md:px-2 py-1 rounded">
-                                                    -{suggestedProduct.discount}
-                                                    %
-                                                </span>
-                                            )}
-                                            <img
-                                                src={
-                                                    suggestedProduct.image[0] ||
-                                                    "https://via.placeholder.com/150"
-                                                }
-                                                alt={suggestedProduct.name}
-                                                className="h-24 md:h-32 object-contain"
-                                            />
-                                        </div>
-                                        <h3 className="text-xs md:text-sm font-medium mb-1 line-clamp-2">
-                                            {suggestedProduct.name}
-                                        </h3>
-                                        <div className="text-red-600 font-semibold text-sm md:text-base">
-                                            $
-                                            {suggestedDiscountedPrice.toFixed(
-                                                2
-                                            )}
-                                        </div>
-                                        {suggestedOriginalPrice && (
-                                            <div className="text-gray-400 line-through text-xs md:text-sm">
+                                        <div className="bg-gray-50 p-2 md:p-4 rounded shadow-sm hover:shadow-md transition cursor-pointer">
+                                            <div className="relative h-32 md:h-48 flex items-center justify-center bg-white mb-2 md:mb-4 overflow-hidden rounded">
+                                                {suggestedProduct.discount && (
+                                                    <span className="absolute top-1 md:top-2 left-1 md:left-2 bg-red-500 text-white text-xs px-1 md:px-2 py-1 rounded">
+                                                        -
+                                                        {
+                                                            suggestedProduct.discount
+                                                        }
+                                                        %
+                                                    </span>
+                                                )}
+                                                <img
+                                                    src={
+                                                        suggestedProduct
+                                                            .imagePublicId[0]
+                                                            ? `${
+                                                                  import.meta
+                                                                      .env
+                                                                      .VITE_API_BASE_URL
+                                                              }/${suggestedProduct.imagePublicId[0].replace(
+                                                                  /\\/g,
+                                                                  "/"
+                                                              )}`
+                                                            : "https://via.placeholder.com/150"
+                                                    }
+                                                    alt={suggestedProduct.name}
+                                                    className="h-24 md:h-32 object-contain"
+                                                />
+                                            </div>
+                                            <h3 className="text-xs md:text-sm font-medium mb-1 line-clamp-2">
+                                                {suggestedProduct.name}
+                                            </h3>
+                                            <div className="text-red-600 font-semibold text-sm md:text-base">
                                                 $
-                                                {suggestedOriginalPrice.toFixed(
+                                                {suggestedDiscountedPrice.toFixed(
                                                     2
                                                 )}
                                             </div>
-                                        )}
-                                        <div className="text-xs text-gray-500 mt-1">
-                                            ⭐{" "}
-                                            {suggestedProduct.ratings.toFixed(
-                                                1
-                                            )}{" "}
-                                            ({suggestedProduct.numberOfReviews})
+                                            {suggestedOriginalPrice && (
+                                                <div className="text-gray-400 line-through text-xs md:text-sm">
+                                                    $
+                                                    {suggestedOriginalPrice.toFixed(
+                                                        2
+                                                    )}
+                                                </div>
+                                            )}
+                                            <div className="text-xs text-gray-500 mt-1">
+                                                ⭐{" "}
+                                                {suggestedProduct.ratings.toFixed(
+                                                    1
+                                                )}{" "}
+                                                (
+                                                {
+                                                    suggestedProduct.numberOfReviews
+                                                }
+                                                )
+                                            </div>
+                                            <button className="mt-2 md:mt-4 w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition text-xs md:text-sm">
+                                                Add to Cart
+                                            </button>
                                         </div>
-                                        <button className="mt-2 md:mt-4 w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition text-xs md:text-sm">
-                                            Add to Cart
-                                        </button>
-                                    </div>
+                                    </Link>
                                 );
                             })}
                         </div>

@@ -52,7 +52,7 @@ const Login = () => {
             }
 
             refreshAuth();
-            console.log(res.data);
+            // console.log(res.data);
             if (res.data?.userDetails?.role === "admin") {
                 localStorage.setItem("role", "admin");
                 navigate("/admin");

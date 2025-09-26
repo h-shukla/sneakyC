@@ -10,8 +10,8 @@ const router = express.Router();
 
 router
     .route("/category")
+    .get(getAllCategories)
     .post(isAuthenticatedUser, authorizedRoles("admin"), createCategory);
-router.route("/category").get(getAllCategories);
 router
     .route("/category/:id")
     .put(isAuthenticatedUser, authorizedRoles("admin"), updateCategory);

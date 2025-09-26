@@ -13,7 +13,7 @@ const ProductsListing: React.FC<ProductsListingProps> = ({ productsProp }) => {
 
     const [sortOption, setSortOption] = useState<string>("");
     const [minPrice, setMinPrice] = useState<number>(0);
-    const [maxPrice, setMaxPrice] = useState<number>(1000); // default slider max
+    const [maxPrice, setMaxPrice] = useState<number>(100000); // default slider max
     const [minRating, setMinRating] = useState<number>(0);
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -21,7 +21,7 @@ const ProductsListing: React.FC<ProductsListingProps> = ({ productsProp }) => {
 
     // For debouncing slider updates
     const [sliderMin, setSliderMin] = useState<number>(0);
-    const [sliderMax, setSliderMax] = useState<number>(1000);
+    const [sliderMax, setSliderMax] = useState<number>(100000);
 
     useEffect(() => {
         if (products.length === 0) {
@@ -31,6 +31,7 @@ const ProductsListing: React.FC<ProductsListingProps> = ({ productsProp }) => {
                         `${import.meta.env.VITE_API_BASE_URL}/products`
                     );
                     setProducts(response.data.products);
+                    console.log(response.data.products);
                 } catch (error) {
                     console.error("Error fetching products:", error);
                 }
@@ -251,8 +252,15 @@ const ProductsListing: React.FC<ProductsListingProps> = ({ productsProp }) => {
                                             )}
                                             <img
                                                 src={
-                                                    product.image[0] ||
-                                                    "https://via.placeholder.com/150"
+                                                    product.imagePublicId[0]
+                                                        ? `${
+                                                              import.meta.env
+                                                                  .VITE_API_BASE_URL
+                                                          }/${product.imagePublicId[0].replace(
+                                                              /\\/g,
+                                                              "/"
+                                                          )}`
+                                                        : "https://via.placeholder.com/150"
                                                 }
                                                 alt={product.name}
                                                 className="h-24 md:h-32 object-contain"

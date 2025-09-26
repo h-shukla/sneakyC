@@ -76,7 +76,9 @@ exports.getAllProducts = catchAsyncErrors(async (req, res, next) => {
 
 // Get specific product details
 exports.getProductDetails = catchAsyncErrors(async (req, res, next) => {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id)
+        .populate("category")
+        .populate("subCategory");
     if (!product) {
         return next(new ErrorHandler("Product not found", 404));
     }
