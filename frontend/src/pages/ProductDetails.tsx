@@ -279,11 +279,16 @@ const ProductDetails: React.FC = () => {
                         </div>
 
                         <div className="space-y-4">
-                            <p className="text-gray-600 leading-relaxed text-sm md:text-base">
-                                {product.description}
-                            </p>
+                            {product.description
+                                .split(";")
+                                .map((item, index) => (
+                                    <span key={index}>
+                                        {item.trim()}
+                                        <br />
+                                    </span>
+                                ))}
 
-                            <div className="flex items-center space-x-2 text-sm">
+                            <div className="flex items-center space-x-2 text-sm mt-6">
                                 <span
                                     className={`px-2 py-1 rounded-full text-xs ${
                                         product.stock > 0

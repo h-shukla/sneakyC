@@ -31,7 +31,6 @@ const ProductsListing: React.FC<ProductsListingProps> = ({ productsProp }) => {
                         `${import.meta.env.VITE_API_BASE_URL}/products`
                     );
                     setProducts(response.data.products);
-                    console.log(response.data.products);
                 } catch (error) {
                     console.error("Error fetching products:", error);
                 }
@@ -113,8 +112,8 @@ const ProductsListing: React.FC<ProductsListingProps> = ({ productsProp }) => {
                     <input
                         type="range"
                         min={0}
-                        max={1000}
-                        step={10}
+                        max={100000}
+                        step={100}
                         value={sliderMin}
                         onChange={(e) => setSliderMin(Number(e.target.value))}
                         className="w-full"
@@ -122,16 +121,16 @@ const ProductsListing: React.FC<ProductsListingProps> = ({ productsProp }) => {
                     <input
                         type="range"
                         min={0}
-                        max={1000}
-                        step={10}
+                        max={100000}
+                        step={100}
                         value={sliderMax}
                         onChange={(e) => setSliderMax(Number(e.target.value))}
                         className="w-full"
                     />
                 </div>
                 <div className="flex justify-between text-sm mt-2">
-                    <span>Min: ${sliderMin}</span>
-                    <span>Max: ${sliderMax}</span>
+                    <span>Min: ₹{sliderMin.toLocaleString()}</span>
+                    <span>Max: ₹{sliderMax.toLocaleString()}</span>
                 </div>
             </div>
 
@@ -266,19 +265,21 @@ const ProductsListing: React.FC<ProductsListingProps> = ({ productsProp }) => {
                                                 className="h-24 md:h-32 object-contain"
                                             />
                                         </div>
-                                        <h3 className="text-xs md:text-sm font-medium mb-1 line-clamp-2">
+                                        <h3 className="text-xs md:text-sm font-medium mb-1 line-clamp-2 truncate">
                                             {product.name}
                                         </h3>
                                         <div className="text-red-600 font-semibold text-sm md:text-base">
-                                            ${product.price}
+                                            ₹{product.price.toLocaleString()}
                                         </div>
                                         {product.discount && (
                                             <div className="text-gray-400 line-through text-xs md:text-sm">
-                                                $
+                                                ₹
                                                 {(
                                                     product.price /
                                                     (1 - product.discount / 100)
-                                                ).toFixed(2)}
+                                                )
+                                                    .toFixed(0)
+                                                    .toLocaleString()}
                                             </div>
                                         )}
                                         <div className="text-xs text-gray-500 mt-1">
