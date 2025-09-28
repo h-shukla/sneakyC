@@ -15,7 +15,7 @@
 -   [x] Multer (read about it) Integration for Image storage and retrievable
 -   [x] Store multiple addresses in usermodel and integrate its ref into ordermodel
 -   [x] HomePage data api route
--   [ ] Cart Integration (need user frontend done upto cart)
+-   [x] Cart Integration (need user frontend done upto cart)
 -   [ ] Wishlist Integration
 -   [ ] Better Order Tracking
 -   [ ] Stock Tracking
@@ -72,6 +72,7 @@
 -   [x] Add Checkout Feature for cart
 -   [x] Add ContextAPI for cart
 -   [x] Add _Cart_ icon to right hand of the navbar
+-   [ ] Create Cart Page
 -   [ ] Add cart icon to product cards in homepage as well as productspage
 -   [ ] Make _Cart_ component functional
 -   [ ] Implement checkout feature (address, payment integration)

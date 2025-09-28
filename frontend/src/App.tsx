@@ -15,14 +15,22 @@ import Orders from "./pages/admin/Orders";
 import ProductsListing from "./pages/ProductsListing";
 import Products from "./pages/admin/Products";
 import ProductDetails from "./pages/ProductDetails";
+import { ToastContainer } from "react-toastify";
+import CartPage from "./pages/CartPage";
 
 function App() {
     return (
         <AuthProvider>
+            <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                pauseOnFocusLoss
+            />
             <Routes>
                 <Route path="/" element={<MainLayout />}>
                     <Route index element={<Home />} />
                     <Route path="/products" element={<ProductsListing />} />
+                    <Route path="/cart" element={<CartPage />} />
                     {/* ✅ dynamic productId route */}
                     <Route
                         path="/product/:productId"

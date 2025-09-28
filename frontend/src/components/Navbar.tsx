@@ -2,10 +2,13 @@ import { useState } from "react";
 import { Search, Heart, ShoppingCart, Menu, X } from "lucide-react";
 import { Link } from "react-router";
 import { useAuth } from "../contexts/authContext";
+import { useCart } from "../contexts/cartContext";
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { isLoggedIn, logout } = useAuth();
+    const { getCartItemCount } = useCart(); // ✅ Access cart count
+    const cartCount = getCartItemCount(); // ✅ Compute cart count
 
     return (
         <div className="w-full">
@@ -22,7 +25,6 @@ const Navbar = () => {
                         {/* Logo */}
                         <div className="flex-shrink-0">
                             <Link to="/">
-                                {" "}
                                 <img
                                     src="/logo.png"
                                     alt="SneakyC Logo"
@@ -90,11 +92,6 @@ const Navbar = () => {
 
                         {/* Right Side Icons */}
                         <div className="flex items-center space-x-4">
-                            {/* Search Icon for Mobile */}
-                            <button className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
-                                <Search className="h-5 w-5 text-gray-600" />
-                            </button>
-
                             {/* Wishlist */}
                             <button className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 relative">
                                 <Heart className="h-6 w-6 text-gray-600 hover:text-yellow-500" />
@@ -104,12 +101,17 @@ const Navbar = () => {
                             </button>
 
                             {/* Shopping Cart */}
-                            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 relative">
+                            <Link
+                                to="/cart"
+                                className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 relative"
+                            >
                                 <ShoppingCart className="h-6 w-6 text-gray-600 hover:text-yellow-500" />
-                                <span className="absolute -top-1 -right-1 bg-yellow-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                    0
-                                </span>
-                            </button>
+                                {cartCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-yellow-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                        {cartCount}
+                                    </span>
+                                )}
+                            </Link>
 
                             {/* Mobile Menu Button */}
                             <button

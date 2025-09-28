@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import {
     Heart,
@@ -8,10 +8,11 @@ import {
     Plus,
     Share2,
     ArrowLeft,
+    Check,
 } from "lucide-react";
 import type { ProductInterface as Product } from "../interface/ProductInterface";
 import { Link, useNavigate, useParams } from "react-router";
-import { addToCart } from "../utils/CartHandler";
+import { useCart } from "../contexts/cartContext";
 
 const ProductDetails: React.FC = () => {
     const params = useParams();
@@ -22,7 +23,22 @@ const ProductDetails: React.FC = () => {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
     const navigate = useNavigate();
+    const { addToCart, cartItems } = useCart();
+
+    // Check if current product is in cart
+    const isProductInCart = useMemo(() => {
+        return cartItems.some((item) => item.product?._id === productId);
+    }, [cartItems, productId]);
+
+    // Get current quantity in cart
+    const cartQuantity = useMemo(() => {
+        const cartItem = cartItems.find(
+            (item) => item.product?._id === productId
+        );
+        return cartItem ? cartItem.quantity : 0;
+    }, [cartItems, productId]);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -80,6 +96,30 @@ const ProductDetails: React.FC = () => {
         setQuantity((prev) =>
             Math.max(1, Math.min(product.stock, prev + change))
         );
+    };
+
+    const handleAddToCart = async () => {
+        if (!product || isAddingToCart) return;
+
+        setIsAddingToCart(true);
+        try {
+            await addToCart(product._id, quantity);
+        } finally {
+            setIsAddingToCart(false);
+        }
+    };
+
+    const handleSuggestedProductAddToCart = async (
+        productId: string,
+        e: React.MouseEvent
+    ) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            await addToCart(productId, 1);
+        } catch (error) {
+            console.error("Failed to add suggested product to cart:", error);
+        }
     };
 
     const renderStars = (rating: number) => {
@@ -205,7 +245,7 @@ const ProductDetails: React.FC = () => {
                         </div>
 
                         {product.imagePublicId.length > 1 && (
-                            <div className="flex space-x-2 overflow-x-auto">
+                            <div className="flex space-x-2 overflow-x-auto pb-2">
                                 {product.imagePublicId.map((img, index) => (
                                     <button
                                         key={index}
@@ -231,7 +271,7 @@ const ProductDetails: React.FC = () => {
                                                     : "https://via.placeholder.com/150"
                                             }
                                             alt={product.name}
-                                            className="h-24 md:h-32 object-contain"
+                                            className="w-full h-full object-contain"
                                         />
                                     </button>
                                 ))}
@@ -245,6 +285,11 @@ const ProductDetails: React.FC = () => {
                             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
                                 {product.name}
                             </h1>
+
+                            <h4 className="text-sm text-gray-600 mb-2">
+                                {product.category?.name}
+                                {"'s "}
+                            </h4>
 
                             <div className="flex items-center space-x-4 mb-4">
                                 <div className="flex items-center space-x-1">
@@ -300,6 +345,11 @@ const ProductDetails: React.FC = () => {
                                         ? `${product.stock} in stock`
                                         : "Out of stock"}
                                 </span>
+                                {isProductInCart && (
+                                    <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                        {cartQuantity} in cart
+                                    </span>
+                                )}
                             </div>
                         </div>
 
@@ -330,23 +380,45 @@ const ProductDetails: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="flex space-x-3">
+                            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                                 <button
-                                    disabled={product.stock === 0}
-                                    onClick={() => addToCart()}
-                                    className="flex-1 bg-black text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 text-sm md:text-base"
+                                    disabled={
+                                        product.stock === 0 ||
+                                        isAddingToCart ||
+                                        isProductInCart
+                                    }
+                                    onClick={handleAddToCart}
+                                    className={`flex-1 py-3 px-4 rounded-lg font-medium flex items-center justify-center space-x-2 text-sm md:text-base transition-all ${
+                                        isProductInCart
+                                            ? "bg-green-600 hover:bg-green-700 text-white"
+                                            : "bg-black hover:bg-gray-800 text-white"
+                                    } disabled:opacity-50 disabled:cursor-not-allowed`}
                                 >
-                                    <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
-                                    <span>Add to Cart</span>
+                                    {isAddingToCart ? (
+                                        <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    ) : isProductInCart ? (
+                                        <Check className="w-4 h-4 md:w-5 md:h-5" />
+                                    ) : (
+                                        <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
+                                    )}
+                                    <span>
+                                        {isAddingToCart
+                                            ? "Adding..."
+                                            : isProductInCart
+                                            ? "In Cart"
+                                            : "Add to Cart"}
+                                    </span>
                                 </button>
 
-                                <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50">
-                                    <Heart className="w-4 h-4 md:w-5 md:h-5" />
-                                </button>
+                                <div className="flex space-x-3 sm:flex-none">
+                                    <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <Heart className="w-4 h-4 md:w-5 md:h-5" />
+                                    </button>
 
-                                <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50">
-                                    <Share2 className="w-4 h-4 md:w-5 md:h-5" />
-                                </button>
+                                    <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <Share2 className="w-4 h-4 md:w-5 md:h-5" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -372,6 +444,12 @@ const ProductDetails: React.FC = () => {
                                               suggestedProduct.discount
                                           )
                                         : null;
+
+                                const isInCart = cartItems.some(
+                                    (item) =>
+                                        item.product?._id ===
+                                        suggestedProduct._id
+                                );
 
                                 return (
                                     <Link
@@ -435,8 +513,35 @@ const ProductDetails: React.FC = () => {
                                                 }
                                                 )
                                             </div>
-                                            <button className="mt-2 md:mt-4 w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition text-xs md:text-sm">
-                                                Add to Cart
+                                            <button
+                                                disabled={
+                                                    product.stock === 0 ||
+                                                    isAddingToCart ||
+                                                    isProductInCart
+                                                }
+                                                onClick={(e) =>
+                                                    handleSuggestedProductAddToCart(
+                                                        suggestedProduct._id,
+                                                        e
+                                                    )
+                                                }
+                                                className={`mt-2 md:mt-4 w-full py-2 rounded transition text-xs md:text-sm flex items-center justify-center space-x-1 ${
+                                                    isInCart
+                                                        ? "bg-green-600 hover:bg-green-700 text-white"
+                                                        : "bg-black text-white hover:bg-gray-800"
+                                                }`}
+                                            >
+                                                {isInCart ? (
+                                                    <>
+                                                        <Check className="w-3 h-3" />
+                                                        <span>In Cart</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <ShoppingCart className="w-3 h-3" />
+                                                        <span>Add to Cart</span>
+                                                    </>
+                                                )}
                                             </button>
                                         </div>
                                     </Link>
