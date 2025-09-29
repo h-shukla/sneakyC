@@ -52,6 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             withCredentials: true,
         });
         localStorage.removeItem("role");
+        localStorage.clear();
         setLoggedIn(false);
         navigate("/");
     }, [navigate]);

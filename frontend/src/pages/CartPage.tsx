@@ -2,24 +2,51 @@ import { useCart } from "../contexts/cartContext";
 import { useState } from "react";
 
 const CartPage = () => {
-    const { cartItems, addToCart, removeFromCart, getCartTotalPrice } =
+    const { cartItems, removeFromCart, updateCartItem, getCartTotalPrice } =
         useCart();
+
     const [loadingItem, setLoadingItem] = useState<string | null>(null);
 
-    const handleQuantityChange = async (
-        productId: string,
-        quantity: number
-    ) => {
+    const handleIncrement = async (productId: string) => {
         setLoadingItem(productId);
         try {
-            const item = cartItems.find(
-                (item) => item.product?._id === productId
-            );
-            if (quantity <= 0) {
-                await removeFromCart(productId);
-            } else if (item && item.product) {
-                await addToCart(item.product, quantity);
+            const item = cartItems.find((it) => it.product?._id === productId);
+            if (item && item.product) {
+                // Increase quantity by 1 using updateCartItem
+                await updateCartItem(productId, item.quantity + 1);
             }
+        } catch (err) {
+            console.error("Failed to increment item:", err);
+        } finally {
+            setLoadingItem(null);
+        }
+    };
+
+    const handleDecrement = async (productId: string) => {
+        setLoadingItem(productId);
+        try {
+            const item = cartItems.find((it) => it.product?._id === productId);
+            if (item) {
+                if (item.quantity <= 1) {
+                    // If at 1 or less, remove completely
+                    await removeFromCart(productId);
+                } else {
+                    await updateCartItem(productId, item.quantity - 1);
+                }
+            }
+        } catch (err) {
+            console.error("Failed to decrement item:", err);
+        } finally {
+            setLoadingItem(null);
+        }
+    };
+
+    const handleRemove = async (productId: string) => {
+        setLoadingItem(productId);
+        try {
+            await removeFromCart(productId);
+        } catch (err) {
+            console.error("Failed to remove item:", err);
         } finally {
             setLoadingItem(null);
         }
@@ -46,7 +73,8 @@ const CartPage = () => {
                                                     src={
                                                         item.product
                                                             .imagePublicId &&
-                                                        item.product.images
+                                                        item.product
+                                                            .imagePublicId
                                                             .length > 0
                                                             ? import.meta.env
                                                                   .VITE_API_BASE_URL +
@@ -70,11 +98,9 @@ const CartPage = () => {
                                                     <button
                                                         className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 border"
                                                         onClick={() =>
-                                                            handleQuantityChange(
+                                                            handleDecrement(
                                                                 item.product!
-                                                                    ._id,
-                                                                item.quantity -
-                                                                    1
+                                                                    ._id
                                                             )
                                                         }
                                                         aria-label="Decrease quantity"
@@ -83,7 +109,7 @@ const CartPage = () => {
                                                             item.product!._id
                                                         }
                                                     >
-                                                        -
+                                                        –
                                                     </button>
                                                     <span className="w-8 text-center">
                                                         {item.quantity}
@@ -91,11 +117,9 @@ const CartPage = () => {
                                                     <button
                                                         className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 border"
                                                         onClick={() =>
-                                                            handleQuantityChange(
+                                                            handleIncrement(
                                                                 item.product!
-                                                                    ._id,
-                                                                item.quantity +
-                                                                    1
+                                                                    ._id
                                                             )
                                                         }
                                                         aria-label="Increase quantity"
@@ -109,10 +133,9 @@ const CartPage = () => {
                                                     <button
                                                         className="ml-4 px-3 py-1 text-red-600 hover:text-red-800 border border-red-200 rounded"
                                                         onClick={() =>
-                                                            handleQuantityChange(
+                                                            handleRemove(
                                                                 item.product!
-                                                                    ._id,
-                                                                0
+                                                                    ._id
                                                             )
                                                         }
                                                         aria-label="Remove item"

@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import type { ProductInterface as Product } from "../interface/ProductInterface";
 import { Link } from "react-router";
+import { useCart } from "../contexts/cartContext";
 
 interface ProductsListingProps {
     productsProp?: Product[];
@@ -22,6 +23,9 @@ const ProductsListing: React.FC<ProductsListingProps> = ({ productsProp }) => {
     // For debouncing slider updates
     const [sliderMin, setSliderMin] = useState<number>(0);
     const [sliderMax, setSliderMax] = useState<number>(100000);
+
+    // cart
+    const { addToCart } = useCart();
 
     useEffect(() => {
         if (products.length === 0) {
@@ -238,11 +242,11 @@ const ProductsListing: React.FC<ProductsListingProps> = ({ productsProp }) => {
                     ) : (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
                             {currentProducts.map((product) => (
-                                <Link
-                                    to={`/product/${product._id}`}
-                                    key={product._id}
-                                >
-                                    <div className="bg-gray-50 p-2 md:p-4 rounded shadow-sm hover:shadow-md transition">
+                                <div className="bg-gray-50 p-2 md:p-4 rounded shadow-sm hover:shadow-md transition">
+                                    <Link
+                                        to={`/product/${product._id}`}
+                                        key={product._id}
+                                    >
                                         <div className="relative h-32 md:h-48 flex items-center justify-center bg-white mb-2 md:mb-4 overflow-hidden rounded">
                                             {product.discount && (
                                                 <span className="absolute top-1 md:top-2 left-1 md:left-2 bg-red-500 text-white text-xs px-1 md:px-2 py-1 rounded">
@@ -268,29 +272,33 @@ const ProductsListing: React.FC<ProductsListingProps> = ({ productsProp }) => {
                                         <h3 className="text-xs md:text-sm font-medium mb-1 line-clamp-2 truncate">
                                             {product.name}
                                         </h3>
-                                        <div className="text-red-600 font-semibold text-sm md:text-base">
-                                            ₹{product.price.toLocaleString()}
-                                        </div>
-                                        {product.discount && (
-                                            <div className="text-gray-400 line-through text-xs md:text-sm">
-                                                ₹
-                                                {(
-                                                    product.price /
-                                                    (1 - product.discount / 100)
-                                                )
-                                                    .toFixed(0)
-                                                    .toLocaleString()}
-                                            </div>
-                                        )}
-                                        <div className="text-xs text-gray-500 mt-1">
-                                            ⭐ {product.ratings.toFixed(1)} (
-                                            {product.numberOfReviews})
-                                        </div>
-                                        <button className="mt-2 md:mt-4 w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition text-xs md:text-sm">
-                                            Add to Cart
-                                        </button>
+                                    </Link>
+                                    <div className="text-red-600 font-semibold text-sm md:text-base">
+                                        ₹{product.price.toLocaleString()}
                                     </div>
-                                </Link>
+                                    {product.discount && (
+                                        <div className="text-gray-400 line-through text-xs md:text-sm">
+                                            ₹
+                                            {(
+                                                product.price /
+                                                (1 - product.discount / 100)
+                                            )
+                                                .toFixed(0)
+                                                .toLocaleString()}
+                                        </div>
+                                    )}
+                                    <div className="text-xs text-gray-500 mt-1">
+                                        ⭐ {product.ratings.toFixed(1)} (
+                                        {product.numberOfReviews})
+                                    </div>
+
+                                    <button
+                                        onClick={() => addToCart(product, 1)}
+                                        className="mt-2 md:mt-4 w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition text-xs md:text-sm"
+                                    >
+                                        Add to Cart
+                                    </button>
+                                </div>
                             ))}
                         </div>
                     )}

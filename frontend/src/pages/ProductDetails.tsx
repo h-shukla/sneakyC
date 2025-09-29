@@ -10,7 +10,10 @@ import {
     ArrowLeft,
     Check,
 } from "lucide-react";
-import type { ProductInterface as Product } from "../interface/ProductInterface";
+import type {
+    ProductInterface as Product,
+    ProductInterface,
+} from "../interface/ProductInterface";
 import { Link, useNavigate, useParams } from "react-router";
 import { useCart } from "../contexts/cartContext";
 
@@ -25,7 +28,7 @@ const ProductDetails: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const navigate = useNavigate();
-    const { addToCart, cartItems } = useCart();
+    const { addToCart, cartItems, updateCartItem } = useCart();
 
     // Check if current product is in cart
     const isProductInCart = useMemo(() => {
@@ -103,20 +106,24 @@ const ProductDetails: React.FC = () => {
 
         setIsAddingToCart(true);
         try {
-            await addToCart(product._id, quantity);
+            if (isProductInCart) {
+                await updateCartItem(product._id, quantity);
+            } else {
+                await addToCart(product, quantity);
+            }
         } finally {
             setIsAddingToCart(false);
         }
     };
 
     const handleSuggestedProductAddToCart = async (
-        productId: string,
+        product: ProductInterface,
         e: React.MouseEvent
     ) => {
         e.preventDefault();
         e.stopPropagation();
         try {
-            await addToCart(productId, 1);
+            await addToCart(product, 1);
         } catch (error) {
             console.error("Failed to add suggested product to cart:", error);
         }
@@ -521,7 +528,7 @@ const ProductDetails: React.FC = () => {
                                                 }
                                                 onClick={(e) =>
                                                     handleSuggestedProductAddToCart(
-                                                        suggestedProduct._id,
+                                                        suggestedProduct,
                                                         e
                                                     )
                                                 }

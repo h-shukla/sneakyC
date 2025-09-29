@@ -72,8 +72,8 @@
 -   [x] Add Checkout Feature for cart
 -   [x] Add ContextAPI for cart
 -   [x] Add _Cart_ icon to right hand of the navbar
--   [ ] Create Cart Page
--   [ ] Add cart icon to product cards in homepage as well as productspage
+-   [x] Create Cart Page
+-   [x] Add cart icon to product cards in homepage as well as productspage
 -   [ ] Make _Cart_ component functional
 -   [ ] Implement checkout feature (address, payment integration)
 -   [ ] Add basic **Contact** page

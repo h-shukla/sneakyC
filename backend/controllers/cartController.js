@@ -52,7 +52,7 @@ exports.addOrUpdateCartItem = catchAsyncErrors(async (req, res) => {
     );
 
     if (existingItem) {
-        existingItem.quantity += quantity;
+        existingItem.quantity = quantity; // set, not +=
     } else {
         user.cart.push({ product: productId, quantity });
     }
@@ -73,7 +73,7 @@ exports.deleteCartItem = catchAsyncErrors(async (req, res) => {
 
     const initialLength = user.cart.length;
     user.cart = user.cart.filter(
-        (item) => item.product.toString() !== productId
+        (item) => item.product._id.toString() !== productId
     );
 
     if (user.cart.length === initialLength) {
