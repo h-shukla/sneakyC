@@ -3,6 +3,18 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const addressSchema = new mongoose.Schema(
+    {
+        address: { type: String, required: true },
+        city: { type: String, required: true },
+        state: { type: String, required: true },
+        country: { type: String, required: true },
+        pinCode: { type: Number, required: true },
+        phoneNo: { type: Number, required: true },
+    },
+    { _id: true }
+);
+
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -62,6 +74,7 @@ const userSchema = new mongoose.Schema({
             },
         },
     ],
+    addresses: [addressSchema],
 });
 
 // Encrypt password before save

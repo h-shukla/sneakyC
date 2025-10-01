@@ -16,6 +16,7 @@
 -   [x] Store multiple addresses in usermodel and integrate its ref into ordermodel
 -   [x] HomePage data api route
 -   [x] Cart Integration (need user frontend done upto cart)
+-   [ ] Add saved address in usermodel
 -   [ ] Wishlist Integration
 -   [ ] Better Order Tracking
 -   [ ] Stock Tracking

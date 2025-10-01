@@ -17,6 +17,7 @@ import Products from "./pages/admin/Products";
 import ProductDetails from "./pages/ProductDetails";
 import { ToastContainer } from "react-toastify";
 import CartPage from "./pages/CartPage";
+import OrderSummary from "./pages/OrderSummary";
 
 function App() {
     return (
@@ -36,6 +37,7 @@ function App() {
                         path="/product/:productId"
                         element={<ProductDetails />}
                     />
+                    <Route path="/order-summary" element={<OrderSummary />} />
                 </Route>
 
                 <Route path="/admin" element={<AdminLayout />}>
@@ -51,6 +53,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/forgot-password" element={<ForgetPassword />} />
+                <Route path="*" element={<h1>404 Not Found</h1>} />
             </Routes>
         </AuthProvider>
     );

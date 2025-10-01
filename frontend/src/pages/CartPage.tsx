@@ -1,11 +1,15 @@
+import { useNavigate } from "react-router";
 import { useCart } from "../contexts/cartContext";
 import { useState } from "react";
+import { useAuth } from "../contexts/authContext";
 
 const CartPage = () => {
     const { cartItems, removeFromCart, updateCartItem, getCartTotalPrice } =
         useCart();
 
     const [loadingItem, setLoadingItem] = useState<string | null>(null);
+    const navigate = useNavigate();
+    const { isLoggedIn } = useAuth();
 
     const handleIncrement = async (productId: string) => {
         setLoadingItem(productId);
@@ -52,6 +56,10 @@ const CartPage = () => {
         }
     };
 
+    const handleCheckout = () => {
+        if (isLoggedIn()) navigate("/order-summary");
+        else navigate("/login");
+    };
     return (
         <div className="container mx-auto py-8">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -190,7 +198,10 @@ const CartPage = () => {
                                     </span>
                                 </div>
                             </div>
-                            <button className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors mt-4">
+                            <button
+                                onClick={handleCheckout}
+                                className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors mt-4"
+                            >
                                 Proceed to Checkout
                             </button>
                         </div>
