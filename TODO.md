@@ -16,11 +16,11 @@
 -   [x] Store multiple addresses in usermodel and integrate its ref into ordermodel
 -   [x] HomePage data api route
 -   [x] Cart Integration (need user frontend done upto cart)
--   [ ] Add saved address in usermodel
+-   [x] Add saved address in usermodel
+-   [ ] Razorpay Integration (for payments)
 -   [ ] Wishlist Integration
 -   [ ] Better Order Tracking
 -   [ ] Stock Tracking
--   [ ] Razorpay Integration (for payments)
 -   [ ] Cloudinary integration for all routes (after core flows are done)
 
 ## 4. Admin Panel (Frontend)
@@ -32,35 +32,26 @@
     -   [x] Implement authentication and authorization for admin routes
     -   [x] Add sidebar navigation for admin features
     -   [x] Create category management page
-
         -   [x] List all categories
         -   [x] Add new category
         -   [x] Edit category
         -   [x] Delete category
-
     -   [x] Create product management page
-
         -   [x] List all products
         -   [x] Add new product form (integrate categoies dropdown)
         -   [x] Edit product details
         -   [x] Delete product
-
     -   [ ] Implement Global Axios instance and connect all existing routes to it
-
     -   [x] Create order management page
-
         -   [ ] List all orders
         -   [ ] View order details
         -   [ ] Update order status
         -   [ ] Delete order
-
     -   [x] Create user management page
-
         -   [ ] List all users
         -   [ ] View user details
         -   [ ] Edit user roles
         -   [ ] Delete user
-
     -   [x] Add Queries section
     -   [ ] Implement responsive design changes to entire panel
 
@@ -76,7 +67,10 @@
 -   [x] Create Cart Page
 -   [x] Add cart icon to product cards in homepage as well as productspage
 -   [x] Make _Cart_ component functional
--   [ ] Implement checkout feature (address, payment integration)
+-   [ ] Add option to add current address after signup
+-   [ ] Implement checkout feature
+    -   [ ] Razorpay
+    -   [ ] Order Placed page
 -   [ ] Add basic **Contact** page
 -   [ ] Add basic **About** page
 -   [ ] Implement _Profile_ page and display user information if logged in

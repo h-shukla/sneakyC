@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, User, Zap } from "lucide-react";
 import { Link } from "react-router";
 import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SignUp = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -23,20 +25,26 @@ const SignUp = () => {
             );
 
             if (res.status !== 200) {
-                alert("Registration failed");
+                toast.error("Registration failed");
                 console.error(
                     "Registration failed: Status not 200",
                     res.data.message
                 );
+                return;
             }
 
+            toast.success("Registration successful!");
+
             // not using navigate to trigger reload
-            window.location.href = "/";
+            setTimeout(() => {
+                window.location.href = "/";
+            }, 1000); // Give user time to see the toast
         } catch (error: any) {
             console.log(error);
-            alert(
-                "Request failed: " + error.response.data.message ||
-                    error.message
+            toast.error(
+                error?.response?.data?.message
+                    ? `Error: ${error.response.data.message}`
+                    : error.message
             );
         } finally {
             setIsLoading(false);
