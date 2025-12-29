@@ -41,6 +41,9 @@
         -   [x] Add new product form (integrate categoies dropdown)
         -   [x] Edit product details
         -   [x] Delete product
+    -   [ ] Mini bugs
+        -   [ ]
+        -   [ ] add a prop to login page that says if it's from checkout and exclude admin user
     -   [ ] Implement Global Axios instance and connect all existing routes to it
     -   [x] Create order management page
         -   [ ] List all orders
@@ -55,7 +58,7 @@
     -   [x] Add Queries section
     -   [ ] Implement responsive design changes to entire panel
 
-## 3. User Facing Frontend (Order Flow First)
+## 3. User Facing Frontend
 
 -   [x] HomePage API Calls
 -   [x] Create **Products** page
@@ -67,6 +70,8 @@
 -   [x] Create Cart Page
 -   [x] Add cart icon to product cards in homepage as well as productspage
 -   [x] Make _Cart_ component functional
+-   [x] Add redux store and slices
+-   [ ] Remove the contextAPI integration
 -   [ ] Add option to add current address after signup
 -   [ ] Implement checkout feature
     -   [ ] Razorpay
