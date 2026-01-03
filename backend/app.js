@@ -33,6 +33,7 @@ app.use("/api/v1", require("./routes/userRoutes"));
 app.use("/api/v1", require("./routes/orderRoutes"));
 app.use("/api/v1", require("./routes/categoryRoutes"));
 app.use("/api/v1", require("./routes/cartRoutes"));
+app.use("/api/v1", require("./routes/paymentRoutes"));
 
 // serving files statically
 app.use("/api/v1/uploads", express.static(path.join(__dirname, "uploads")));
